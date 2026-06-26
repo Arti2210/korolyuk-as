@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Королюк А.С.</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --v: #6B2FBE;   /* violet */
+  --v2: #8B4FDE;
+  --v3: #A96FF5;
+  --o: #C85A10;   /* orange */
+  --o2: #E8781E;
+  --o3: #FF9840;
+  --g: #2A7A40;   /* green */
+  --g2: #3DAF5A;
+  --g3: #5BD47A;
+  --bg: #060409;
+  --bg2: #0C0814;
+  --line: rgba(255,255,255,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+
+body {
+  min-height:100vh;
+  background: var(--bg);
+  font-family:'Manrope',sans-serif;
+  overflow-x:hidden;
+  color:#fff;
+}
+
+/* ── GRID OVERLAY ────────────────────────────── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  pointer-events:none;
+}
+
+/* ── CANVAS ─────────────────────────────────── */
+#bg { position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.7; }
+
+/* ── AMBIENT GLOWS ──────────────────────────── */
+.glow {
+  position:fixed; border-radius:50%; pointer-events:none; z-index:1;
+  mix-blend-mode: screen;
+}
+.gl1 { width:600px;height:600px;
+  background:radial-gradient(circle, rgba(107,47,190,0.35) 0%, transparent 70%);
+  top:-200px; left:-150px; animation:ga 18s ease-in-out infinite; }
+.gl2 { width:500px;height:500px;
+  background:radial-gradient(circle, rgba(200,90,16,0.25) 0%, transparent 70%);
+  bottom:-150px; right:-100px; animation:gb 22s ease-in-out infinite; }
+.gl3 { width:400px;height:400px;
+  background:radial-gradient(circle, rgba(42,122,64,0.2) 0%, transparent 70%);
+  top:50%; left:50%; transform:translate(-50%,-50%); animation:gc 14s ease-in-out infinite; }
+
+@keyframes ga{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.1)}}
+@keyframes gb{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,-60px) scale(1.15)}}
+@keyframes gc{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.3)}}
+
+/* ── SCAN LINE ───────────────────────────────── */
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.03) 3px,
+    rgba(0,0,0,0.03) 4px
+  );
+}
+
+/* ── PAGE LAYOUT ─────────────────────────────── */
+.page {
+  position:relative; z-index:2;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center;
+  padding:56px 20px 80px;
+  max-width:520px; margin:0 auto;
+}
+
+/* ── BADGE ───────────────────────────────────── */
+.badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 16px;
+  border:1px solid rgba(139,79,222,0.4);
+  border-radius:99px;
+  background:rgba(107,47,190,0.08);
+  backdrop-filter:blur(10px);
+  margin-bottom:40px;
+  animation:fadeD .8s ease both;
+}
+.badge-dot {
+  width:6px; height:6px; border-radius:50%;
+  background: var(--v2);
+  box-shadow: 0 0 8px var(--v2);
+  animation: dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.badge-text {
+  font-size:10px; letter-spacing:.3em; text-transform:uppercase;
+  color:rgba(255,255,255,.45); font-weight:600;
+}
+
+/* ── AVATAR ──────────────────────────────────── */
+.av-wrap {
+  position:relative; width:130px; height:130px;
+  margin-bottom:28px;
+  animation:fadeD 1s ease both .1s;
+}
+
+/* Outer rotating gradient border */
+.av-border {
+  position:absolute; inset:-4px; border-radius:50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--v) 0deg, var(--o2) 120deg,
+    var(--g2) 240deg, var(--v) 360deg
+  );
+  animation: borderSpin 6s linear infinite;
+}
+.av-border::after {
+  content:''; position:absolute; inset:3px; border-radius:50%;
+  background:var(--bg);
+}
+
+/* Inner subtle border */
+.av-inner {
+  position:absolute; inset:-1px; border-radius:50%;
+  border:1px solid rgba(255,255,255,0.12);
+  z-index:2;
+}
+
+/* Pulse rings */
+.av-p1,.av-p2 {
+  position:absolute; border-radius:50%; pointer-events:none;
+}
+.av-p1 { inset:-16px; border:1px solid rgba(107,47,190,0.3); animation:pr 3.5s ease-out infinite; }
+.av-p2 { inset:-28px; border:1px solid rgba(200,90,16,0.15); animation:pr 3.5s ease-out infinite 1.5s; }
+@keyframes pr{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.2);opacity:0}}
+@keyframes borderSpin{to{transform:rotate(360deg)}}
+
+.av-img {
+  position:relative; z-index:3;
+  width:100%; height:100%; border-radius:50%;
+  object-fit:cover; object-position:center top;
+  display:block;
+}
+.av-ph {
+  display:none; position:relative; z-index:3;
+  width:100%; height:100%; border-radius:50%;
+  background:linear-gradient(135deg,var(--v),var(--o));
+  align-items:center; justify-content:center;
+  font-family:'Jua',cursive; font-size:44px; color:#fff;
+}
+
+/* ── NAME ────────────────────────────────────── */
+.name {
+  font-family:'Jua',cursive;
+  font-size:28px; letter-spacing:.12em;
+  color:#fff;
+  text-shadow: 0 0 40px rgba(139,79,222,.6);
+  margin-bottom:10px;
+  animation:fadeU 1s ease both .2s;
+  position:relative;
+}
+/* Glitch effect on hover */
+.name:hover { animation: glitch .4s step-end; }
+@keyframes glitch {
+  0%,100%{text-shadow:0 0 40px rgba(139,79,222,.6)}
+  20%{text-shadow:-3px 0 var(--o),3px 0 var(--g2),0 0 40px rgba(139,79,222,.6)}
+  40%{text-shadow:3px 0 var(--o),-3px 0 var(--g2),0 0 40px rgba(139,79,222,.6)}
+  60%{text-shadow:-2px 0 var(--v3),2px 0 var(--o3),0 0 40px rgba(139,79,222,.6)}
+}
+
+/* ── TAGLINES ────────────────────────────────── */
+.roles {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  margin-bottom:48px;
+  animation:fadeU 1s ease both .3s;
+}
+.role-line {
+  font-size:10px; font-weight:600;
+  letter-spacing:.28em; text-transform:uppercase;
+  color:rgba(255,255,255,.3);
+}
+.role-line span {
+  background:linear-gradient(90deg,var(--v3),var(--o3));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.role-mood {
+  font-size:11px; font-style:italic; font-weight:400;
+  color:rgba(255,255,255,.2); letter-spacing:.12em;
+  margin-top:4px;
+}
+
+/* ── DIVIDER ─────────────────────────────────── */
+.divider {
+  width:100%; display:flex; align-items:center; gap:12px;
+  margin-bottom:20px;
+  animation:fadeU 1s ease both .35s;
+}
+.divider-line {
+  flex:1; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(139,79,222,.4),transparent);
+}
+.divider-icon { font-size:12px; color:rgba(255,255,255,.2); }
+
+/* ── LINKS ───────────────────────────────────── */
+.links { width:100%; display:flex; flex-direction:column; gap:10px; }
+
+.lc {
+  display:flex; align-items:center; gap:14px;
+  padding:13px 16px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;
+  text-decoration:none; color:#fff;
+  backdrop-filter:blur(20px);
+  transition:all .3s cubic-bezier(.25,1,.5,1);
+  position:relative; overflow:hidden;
+  animation:cardIn .7s ease both;
+}
+
+/* Top edge accent */
+.lc::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--ac),transparent);
+  opacity:0; transition:opacity .3s;
+}
+/* Bottom scan line sweep */
+.lc::after {
+  content:''; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.04) 50%,transparent 60%);
+  transform:translateX(-100%); transition:transform .7s ease;
+}
+.lc:hover::before { opacity:1; }
+.lc:hover::after  { transform:translateX(120%); }
+.lc:hover {
+  background:rgba(255,255,255,.055);
+  border-color:color-mix(in srgb,var(--ac) 45%,transparent);
+  box-shadow:
+    0 8px 32px -8px color-mix(in srgb,var(--ac) 50%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--ac) 20%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  transform:translateY(-3px);
+}
+
+.c-ph { --ac:var(--g2);  animation-delay:.28s; }
+.c-tg { --ac:#29B6F6;   animation-delay:.36s; }
+.c-ig { --ac:#E1306C;   animation-delay:.44s; }
+.c-tt { --ac:#ff3060;   animation-delay:.52s; }
+.c-wa { --ac:var(--g3); animation-delay:.60s; }
+.c-gm { --ac:var(--o2); animation-delay:.68s; }
+
+/* ── ICON BOX ────────────────────────────────── */
+.li {
+  width:44px; height:44px; border-radius:12px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all .3s ease; position:relative; overflow:hidden;
+}
+.li::before {
+  content:''; position:absolute; inset:0; border-radius:inherit;
+  background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--ac) 30%,transparent) 0%, transparent 70%);
+  opacity:0; transition:opacity .3s;
+}
+.lc:hover .li { transform:scale(1.12) rotate(-6deg); border-color:color-mix(in srgb,var(--ac) 50%,transparent); }
+.lc:hover .li::before { opacity:1; }
+
+.is { width:24px; height:24px; transition:filter .3s; display:block; }
+.lc:hover .is { filter:drop-shadow(0 0 6px var(--ac)); }
+
+/* Per-icon animations */
+.c-ph .is { animation:icRing 4s ease-in-out infinite; }
+.c-tg .is { animation:icUp 3s ease-in-out infinite; }
+.c-ig .is { animation:icSpin 12s linear infinite; }
+.c-tt .is { animation:icPulse 2.5s ease-in-out infinite; }
+.c-wa .is { animation:icWave 3s ease-in-out infinite; }
+.c-gm .is { animation:icFloat 4s ease-in-out infinite; }
+
+@keyframes icRing{0%,80%,100%{transform:rotate(0)}10%{transform:rotate(-18deg)}20%{transform:rotate(16deg)}30%{transform:rotate(0)}}
+@keyframes icUp{0%,100%{transform:translateY(0)}45%,55%{transform:translateY(-4px)}}
+@keyframes icSpin{to{transform:rotate(360deg)}}
+@keyframes icPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@keyframes icWave{0%,100%{transform:rotate(0)}30%{transform:rotate(15deg)}70%{transform:rotate(-15deg)}}
+@keyframes icFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ── TEXT ────────────────────────────────────── */
+.lt { flex:1; min-width:0; }
+.ln {
+  font-family:'Jua',cursive; font-size:13px;
+  color:rgba(255,255,255,.92); letter-spacing:.04em; margin-bottom:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ls {
+  font-size:11px; font-weight:400;
+  color:rgba(255,255,255,.3); letter-spacing:.02em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.la {
+  font-size:16px; color:rgba(255,255,255,.15);
+  transition:all .3s; flex-shrink:0;
+}
+.lc:hover .la { color:var(--ac); transform:translateX(5px); }
+
+/* ── FOOTER ──────────────────────────────────── */
+.footer {
+  margin-top:56px;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  animation:fadeU 1s ease both 1s;
+}
+.footer-line { width:40px; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent); }
+.footer-text { font-size:10px; color:rgba(255,255,255,.1); letter-spacing:.2em; font-weight:500; }
+
+/* ── KEYFRAMES ───────────────────────────────── */
+@keyframes fadeD{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeU{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="glow gl1"></div>
+<div class="glow gl2"></div>
+<div class="glow gl3"></div>
+
+<div class="page">
+
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span class="badge-text">Profile</span>
+  </div>
+
+  <div class="av-wrap">
+    <div class="av-border"></div>
+    <div class="av-inner"></div>
+    <div class="av-p1"></div>
+    <div class="av-p2"></div>
+    <img class="av-img" src="photo.jpg" alt="Фото"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="av-ph">К</div>
+  </div>
+
+  <div class="name">Королюк А.С.</div>
+
+  <div class="roles">
+    <div class="role-line"><span>VISIONARY</span> · CREATOR · ARCHITECT</div>
+    <div class="role-mood">Mood Architect · Curator of Good Vibes</div>
+  </div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-icon">◆</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="links">
+
+    <!-- PHONE -->
+    <a class="lc c-ph" href="tel:+380971286111">
+      <div class="li">
+        <svg class="is" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gph" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#5BD47A"/><stop offset="100%" stop-color="#2A7A40"/>
+            </linearGradient>
+          </defs>
+          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.01l-2.2 2.21z" fill="url(#gph)"/>
+        </svg>
+      </div>
+      <div class="lt">
+        <div class="ln">Телефон</div>
+        <div class="ls">+380 97 128 6111</div>
+      </div>
+      <div class="la">›</div>
+    </a>
+
+    <!-- TELEGRAM -->
+    <a class="lc c-tg" href="https://t.me/Dr_Dark_X" target="_blank" rel="noopener">
+      <div class="li">
+        <svg class="is" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gtg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#54C5F8"/><stop offset="100%" stop-color="#0088CC"/>
+            </linearGradient>
+          </defs>
+          <!-- Official Telegram logo path -->
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.024 9.542c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.9l-2.965-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.983.659-.003.014-.003.028-.332 1.027z" fill="url(#gtg)"/>
+        </svg>
+      </div>
+      <div class="lt">
+        <div class="ln">Telegram</div>
+        <div class="ls">@Dr_Dark_X</div>
+      </div>
+      <div class="la">›</div>
+    </a>
+
+    <!-- INSTAGRAM -->
+    <a class="lc c-ig" href="https://www.instagram.com/korol_archi?igsh=NHNncm5saTdlZW5j" target="_blank" rel="noopener">
+      <div class="li">
+        <svg class="is" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="gig1" cx="30%" cy="107%" r="140%">
+              <stop offset="0%" stop-color="#ffd600"/>
+              <stop offset="50%" stop-color="#ff0069"/>
+              <stop offset="100%" stop-color="#d300c5"/>
+            </radialGradient>
+            <radialGradient id="gig2" cx="10%" cy="100%" r="100%">
+              <stop offset="0%" stop-color="#ff6600"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#gig1)"/>
+        </svg>
+      </div>
+      <div class="lt">
+        <div class="ln">Instagram</div>
+        <div class="ls">@korol_archi</div>
+      </div>
+      <div class="la">›</div>
+    </a>
+
+    <!-- TIKTOK -->
+    <a class="lc c-tt" href="https://www.tiktok.com/@korol_archi?_r=1&_t=ZS-95TXoVRu0KW" target="_blank" rel="noopener">
+      <div class="li">
+        <svg class="is" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <!-- Official TikTok logo -->
+          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.75a8.16 8.16 0 004.78 1.52V6.82a4.85 4.85 0 01-1.01-.13z" fill="#fff"/>
+          <!-- Cyan shadow layer -->
+          <path d="M18.58 5.69a4.83 4.83 0 01-3.77-4.25V1h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V8.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V7.75a8.16 8.16 0 004.78 1.52V5.82a4.85 4.85 0 01-1.01-.13z" fill="#69C9D0" opacity="0.5"/>
+          <!-- Red shadow layer -->
+          <path d="M20.59 7.69a4.83 4.83 0 01-3.77-4.25V3h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V10.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.75a8.16 8.16 0 004.78 1.52V7.82a4.85 4.85 0 01-1.01-.13z" fill="#EE1D52" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="lt">
+        <div class="ln">TikTok</div>
+        <div class="ls">@korol_archi</div>
+      </div>
+      <div class="la">›</div>
+    </a>
+
+    <!-- WHATSAPP -->
+    <a class="lc c-wa" href="https://wa.me/380971286111" target="_blank" rel="noopener">
+      <div class="li">
+        <svg class="is" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gwa" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#5BD97A"/><stop offset="100%" stop-color="#25D366"/>
+            </linearGradient>
+          </defs>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" fill="url(#gwa)"/>
+        </svg>
+      </div>
+      <div class="lt">
+        <div class="ln">WhatsApp</div>
+        <div class="ls">Написати в WhatsApp</div>
+      </div>
+      <div class="la">›</div>
+    </a>
+
+    <!-- GMAIL -->
+    <a class="lc c-gm" href="mailto:Korol.artem2013@gmail.com">
+      <div class="li">
+        <svg class="is" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <!-- Official Gmail M-shape -->
+          <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.908 1.528-1.147C21.69 2.28 24 3.434 24 5.457z" fill="#EA4335"/>
+          <path d="M0 5.457l6.545 4.908V4.64L5.017 3.493C3.399 2.279 0 3.434 0 5.457z" fill="#C5221F"/>
+          <path d="M24 5.457l-6.545 4.908V4.64l1.528-1.147C20.601 2.279 24 3.434 24 5.457z" fill="#C5221F"/>
+          <path d="M6.545 10.365L12 14.548l5.455-4.183V4.64L12 8.822 6.545 4.64v5.725z" fill="#FBBC04"/>
+          <path d="M17.455 4.64v5.725L24 5.457V5.457c0-2.023-2.309-3.178-3.927-1.964L17.455 4.64z" fill="#34A853"/>
+        </svg>
+      </div>
+      <div class="lt">
+        <div class="ln">Gmail</div>
+        <div class="ls">Korol.artem2013@gmail.com</div>
+      </div>
+      <div class="la">›</div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-text">© КОРОЛЮК А.С. · 2026</div>
+  </div>
+
+</div>
+
+<script>
+// ── PREMIUM PARTICLE BACKGROUND ─────────────────────────────
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Color palette — saturated but not neon-childish
+const COLORS = [
+  '#7B3FBE', '#9B5FDE', '#B07FFF',
+  '#C85A10', '#E8781E', '#FF9840',
+  '#2A7A40', '#3DAF5A', '#55CF72',
+  '#2A5F9A', '#3A7FCA', '#5A9FEA',
+];
+
+// ── Geometric particles with depth ──
+class Geo {
+  constructor() { this.init(true); }
+  init(first = false) {
+    this.type  = Math.floor(Math.random() * 8);
+    this.x     = Math.random() * W;
+    this.y     = first ? Math.random() * H : H + 60;
+    this.z     = 0.25 + Math.random() * 0.75;
+    this.size  = (8 + Math.random() * 44) * this.z;
+    this.col   = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.alpha = (0.06 + Math.random() * 0.22) * this.z;
+    this.vx    = (Math.random() - 0.5) * 0.4;
+    this.vy    = -(0.15 + Math.random() * 0.5) * this.z;
+    this.rot   = Math.random() * Math.PI * 2;
+    this.rotV  = (Math.random() - 0.5) * 0.018;
+    this.ph    = Math.random() * Math.PI * 2;
+    this.wb    = Math.random() * Math.PI * 2;
+  }
+  update() {
+    this.x  += this.vx + Math.sin(this.wb) * 0.25;
+    this.y  += this.vy;
+    this.rot += this.rotV;
+    this.ph  += 0.016;
+    this.wb  += 0.009;
+    if (this.y < -100) this.init();
+  }
+  draw() {
+    const s = this.size * (1 + Math.sin(this.ph) * 0.06);
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    ctx.shadowColor = this.col;
+    ctx.shadowBlur  = 10 * this.z;
+
+    const mkGrad = () => {
+      const g = ctx.createRadialGradient(-s*.25,-s*.3,s*.02,0,0,s*.55);
+      g.addColorStop(0, 'rgba(255,255,255,0.6)');
+      g.addColorStop(0.4, this.col + 'CC');
+      g.addColorStop(1,   this.col + '44');
+      return g;
+    };
+
+    ctx.strokeStyle = this.col + '99';
+    ctx.fillStyle   = mkGrad();
+    ctx.lineWidth   = 1;
+
+    switch (this.type) {
+      case 0: // ring
+        ctx.beginPath(); ctx.arc(0,0,s*.48,0,Math.PI*2);
+        ctx.arc(0,0,s*.3,0,Math.PI*2,true);
+        ctx.fill(); break;
+
+      case 1: { // isometric cube
+        const h=s*.38, ox=h*.5, oy=h*.28;
+        // top
+        ctx.beginPath(); ctx.moveTo(0,-h/2-oy); ctx.lineTo(ox,-h/2); ctx.lineTo(0,-h/2+oy); ctx.lineTo(-ox,-h/2); ctx.closePath();
+        ctx.fillStyle='rgba(255,255,255,0.18)'; ctx.fill(); ctx.stroke();
+        // right
+        ctx.beginPath(); ctx.moveTo(ox,-h/2); ctx.lineTo(ox,h/2); ctx.lineTo(0,h/2+oy); ctx.lineTo(0,-h/2+oy); ctx.closePath();
+        ctx.fillStyle=this.col+'88'; ctx.fill(); ctx.stroke();
+        // left
+        ctx.beginPath(); ctx.moveTo(-ox,-h/2); ctx.lineTo(0,-h/2+oy); ctx.lineTo(0,h/2+oy); ctx.lineTo(-ox,h/2); ctx.closePath();
+        ctx.fillStyle=this.col+'44'; ctx.fill(); ctx.stroke();
+        break; }
+
+      case 2: { // diamond
+        const d=s*.48;
+        ctx.beginPath(); ctx.moveTo(0,-d); ctx.lineTo(d*.6,-d*.15); ctx.lineTo(d*.6,d*.15); ctx.lineTo(0,d); ctx.lineTo(-d*.6,d*.15); ctx.lineTo(-d*.6,-d*.15); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.globalAlpha=this.alpha*.35;
+        ctx.beginPath(); ctx.moveTo(0,-d); ctx.lineTo(0,d*.1); ctx.lineTo(d*.6,-d*.15);
+        ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=.7; ctx.stroke();
+        break; }
+
+      case 3: { // hexagon
+        ctx.beginPath();
+        for(let i=0;i<6;i++){const a=i*Math.PI/3-Math.PI/6;if(i===0)ctx.moveTo(Math.cos(a)*s*.45,Math.sin(a)*s*.45);else ctx.lineTo(Math.cos(a)*s*.45,Math.sin(a)*s*.45);}
+        ctx.closePath(); ctx.fill(); ctx.stroke(); break; }
+
+      case 4: { // triangle
+        const h4=s*.5;
+        ctx.beginPath(); ctx.moveTo(0,-h4); ctx.lineTo(h4*.87,h4*.5); ctx.lineTo(-h4*.87,h4*.5); ctx.closePath();
+        ctx.fill(); ctx.stroke(); break; }
+
+      case 5: { // cross / plus
+        ctx.beginPath(); ctx.roundRect(-s*.1,-s*.45,s*.2,s*.9,2);
+        ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(-s*.45,-s*.1,s*.9,s*.2,2);
+        ctx.fill(); ctx.stroke(); break; }
+
+      case 6: { // sphere
+        ctx.beginPath(); ctx.arc(0,0,s*.46,0,Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha=this.alpha*.5;
+        ctx.beginPath(); ctx.ellipse(-s*.15,-s*.18,s*.12,s*.07,-.5,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fill();
+        break; }
+
+      case 7: { // line segment (elegant)
+        ctx.lineWidth=1.5; ctx.strokeStyle=this.col+'BB';
+        ctx.beginPath(); ctx.moveTo(-s*.4,-s*.4); ctx.lineTo(s*.4,s*.4); ctx.stroke();
+        ctx.globalAlpha=this.alpha*.5;
+        ctx.beginPath(); ctx.moveTo(-s*.25,-s*.4); ctx.lineTo(s*.4,s*.25); ctx.stroke();
+        break; }
+    }
+    ctx.restore();
+  }
+}
+
+// ── Fine floating dust particles ──
+class Dust {
+  constructor() { this.reset(true); }
+  reset(first=false) {
+    this.x   = Math.random()*W;
+    this.y   = first ? Math.random()*H : H+4;
+    this.r   = .4 + Math.random()*1.6;
+    this.col = COLORS[Math.floor(Math.random()*COLORS.length)];
+    this.a   = .2 + Math.random()*.55;
+    this.vx  = (Math.random()-.5)*.3;
+    this.vy  = -(0.12+Math.random()*.65);
+    this.life=0; this.ml=200+Math.random()*350;
+  }
+  update() { this.x+=this.vx; this.y+=this.vy; this.life++; if(this.life>this.ml||this.y<-4)this.reset(); }
+  draw() {
+    const f=1-Math.pow(this.life/this.ml,2);
+    ctx.save(); ctx.globalAlpha=this.a*f;
+    ctx.shadowColor=this.col; ctx.shadowBlur=4;
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle=this.col; ctx.fill(); ctx.restore();
+  }
+}
+
+// ── Horizontal scan lines that drift up ──
+class ScanLine {
+  constructor() { this.reset(true); }
+  reset(first=false) {
+    this.y   = first ? Math.random()*H : H+5;
+    this.vy  = -(0.3+Math.random()*.5);
+    this.w   = 60+Math.random()*200;
+    this.x   = Math.random()*W;
+    this.col = COLORS[Math.floor(Math.random()*COLORS.length)];
+    this.a   = .04+Math.random()*.08;
+    this.h   = .5+Math.random()*1.5;
+  }
+  update() { this.y+=this.vy; if(this.y<-5)this.reset(); }
+  draw() {
+    ctx.save(); ctx.globalAlpha=this.a;
+    const g=ctx.createLinearGradient(this.x,0,this.x+this.w,0);
+    g.addColorStop(0,'transparent'); g.addColorStop(.5,this.col); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g; ctx.fillRect(this.x,this.y,this.w,this.h); ctx.restore();
+  }
+}
+
+const geos   = Array.from({length:30}, () => new Geo());
+const dusts  = Array.from({length:80}, () => new Dust());
+const scans  = Array.from({length:20}, () => new ScanLine());
+
+function loop() {
+  ctx.clearRect(0,0,W,H);
+  scans.forEach(s=>{s.update();s.draw();});
+  geos.forEach(g=>{g.update();g.draw();});
+  dusts.forEach(d=>{d.update();d.draw();});
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
